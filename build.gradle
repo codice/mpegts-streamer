@@ -1,10 +1,14 @@
 apply plugin: 'java'
+apply plugin: 'maven'
 
 version = '0.1'
 sourceCompatibility = 1.8
 
 repositories {
     mavenCentral()
+    maven {
+            url "http://artifacts.codice.org/content/groups/public"
+    }
 }
 
 configurations {
@@ -16,7 +20,7 @@ configurations {
 
 dependencies {
 
-	compile group: 'org.jcodec',          name: 'jcodec',                           version: '0.2.0'
+	compile group: 'org.jcodec',          name: 'jcodec',                           version: '0.2.0_1'
 
 	compile group: 'ch.qos.logback',      name: 'logback-classic',                  version: '1.1.2'
 	compile group: 'org.slf4j',           name: 'jcl-over-slf4j',                   version: '1.7.7'
@@ -27,3 +31,17 @@ dependencies {
 
 	testCompile group: 'junit', name: 'junit', version: '4.11'
 }
+
+uploadArchives {
+    repositories {
+       mavenDeployer {
+             repository(url: "http://artifacts.codice.org/content/repositories/releases") {
+             authentication(userName: nexusUsername, password: nexusPassword)
+}
+             pom.version = "0.1.0_1"
+             pom.artifactId = "mpegts-streamer"
+             pom.groupId = "org.taktik"
+       }
+    }
+}
+
