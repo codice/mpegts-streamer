@@ -1,5 +1,7 @@
-apply plugin: 'java'
-apply plugin: 'maven'
+plugins {
+    id 'java'
+    id 'maven-publish'
+}
 
 version = '0.1.0_2'
 group = 'org.taktik'
@@ -8,40 +10,52 @@ sourceCompatibility = 1.8
 repositories {
     mavenCentral()
     maven {
-            url "http://artifacts.codice.org/content/groups/public"
+        name = 'GitHubPackages'
+        url = uri('https://maven.pkg.github.com/codice/*')
+        credentials {
+            username = findProperty('username') ?: System.getenv('GITHUB_ACTOR') ?: ''
+            password = findProperty('password') ?: System.getenv('GITHUB_TOKEN') ?: ''
+        }
     }
 }
 
 configurations {
-	all*.exclude group: 'commons-logging',          module: 'commons-logging'
-	all*.exclude group: 'org.slf4j',                module: 'slf4j-log4j12'
-	all*.exclude group: 'log4j',                    module: 'log4j'
-	all*.exclude group: 'log4j',                    module: 'apache-log4j-extras'
+    all*.exclude group: 'commons-logging',          module: 'commons-logging'
+    all*.exclude group: 'org.slf4j',                module: 'slf4j-log4j12'
+    all*.exclude group: 'log4j',                    module: 'log4j'
+    all*.exclude group: 'log4j',                    module: 'apache-log4j-extras'
 }
 
 dependencies {
+    implementation group: 'org.jcodec',          name: 'jcodec',                           version: '0.2.0_1'
 
-	compile group: 'org.jcodec',          name: 'jcodec',                           version: '0.2.0_1'
+    implementation group: 'ch.qos.logback',      name: 'logback-classic',                  version: '1.2.3'
+    implementation group: 'org.slf4j',           name: 'jcl-over-slf4j',                   version: '1.7.7'
+    implementation group: 'org.slf4j',           name: 'jul-to-slf4j',                     version: '1.7.7'
+    implementation group: 'org.slf4j',           name: 'log4j-over-slf4j',                 version: '1.7.7'
 
-	compile group: 'ch.qos.logback',      name: 'logback-classic',                  version: '1.2.3'
-	compile group: 'org.slf4j',           name: 'jcl-over-slf4j',                   version: '1.7.7'
-	compile group: 'org.slf4j',           name: 'jul-to-slf4j',  		            version: '1.7.7'
-	compile group: 'org.slf4j',           name: 'log4j-over-slf4j',                 version: '1.7.7'
+    implementation group: 'com.google.guava', name: 'guava', version: '17.0'
 
-	compile group: 'com.google.guava', name: 'guava', version: '17.0'
-
-	testCompile group: 'junit', name: 'junit', version: '4.11'
+    testImplementation group: 'junit', name: 'junit', version: '4.11'
 }
 
-uploadArchives {
+publishing {
+    publications {
+        maven(MavenPublication) {
+            from components.java
+            groupId = 'org.taktik'
+            artifactId = 'mpegts-streamer'
+            version = '0.1.0_2'
+        }
+    }
     repositories {
-       mavenDeployer {
-             repository(url: "http://artifacts.codice.org/content/repositories/releases") {
-             authentication(userName: nexusUsername, password: nexusPassword)
-}
-             pom.version = "0.1.0_2"
-             pom.artifactId = "mpegts-streamer"
-             pom.groupId = "org.taktik"
-       }
+        maven {
+            name = 'GitHubPackages'
+            url = uri(findProperty('publishUrl') ?: 'https://maven.pkg.github.com/codice/mpegts-streamer')
+            credentials {
+                username = findProperty('username') ?: System.getenv('GITHUB_ACTOR')
+                password = findProperty('password') ?: System.getenv('GITHUB_TOKEN')
+            }
+        }
     }
 }
